@@ -1,5 +1,58 @@
 # Changelog
 
+## [2.171.0](https://github.com/supabase/auth/compare/v2.170.0...v2.171.0) (2025-04-14)
+
+
+### Features
+
+* add sign in with solana (EIP-4361) support ([#1918](https://github.com/supabase/auth/issues/1918)) ([d121546](https://github.com/supabase/auth/commit/d1215464d4c81bb6e2e210df81ba0263d90ffb64))
+* allow invalid config directories ([#1969](https://github.com/supabase/auth/issues/1969)) ([6b842f6](https://github.com/supabase/auth/commit/6b842f6b304bba5f886c6bf8b5675d914f881a2d))
+* allow limiting lifespan of low-aal sessions ([#1942](https://github.com/supabase/auth/issues/1942)) ([d7a9ca6](https://github.com/supabase/auth/commit/d7a9ca62a7a09edd864f0b968c1882f5e464e662))
+* Block specific outgoing mail servers ([#1971](https://github.com/supabase/auth/issues/1971)) ([091aef9](https://github.com/supabase/auth/commit/091aef945a764ee8d3b80ae8c5ed5d88dd582d03))
+* refactor hooks out of api package ([#1976](https://github.com/supabase/auth/issues/1976)) ([c5904c0](https://github.com/supabase/auth/commit/c5904c05d9dce4366e6527aa40e439a3c8c460bb))
+* separate web3 rate limits from other `/token?grant_type=...` ([#1985](https://github.com/supabase/auth/issues/1985)) ([8b23382](https://github.com/supabase/auth/commit/8b233820e41fedd18338eb37345ecbb0beb350ce))
+
+
+### Bug Fixes
+
+* explicit permisions on actions ([#1978](https://github.com/supabase/auth/issues/1978)) ([06e9ead](https://github.com/supabase/auth/commit/06e9ead3e09e77631597a953a535cb93dd006c7f))
+* propagate error when when confirming phone ([#1939](https://github.com/supabase/auth/issues/1939)) ([e882b42](https://github.com/supabase/auth/commit/e882b42f3929ab2e587a41ba6593edaf237e5535))
+* redirects must not be to ip addresses ([#1984](https://github.com/supabase/auth/issues/1984)) ([347e23a](https://github.com/supabase/auth/commit/347e23a98c2ee362620d2711d12a76d7bc266a8f))
+* sanitize redirect URL (remove fragment, query) before pattern matching ([#1974](https://github.com/supabase/auth/issues/1974)) ([ccf20d7](https://github.com/supabase/auth/commit/ccf20d724f31871b71292e0ea867c48e2cdfdbcb))
+
+## [2.170.0](https://github.com/supabase/auth/compare/v2.169.0...v2.170.0) (2025-03-06)
+
+
+### Features
+
+* improvements to config reloader, 100% coverage ([#1933](https://github.com/supabase/auth/issues/1933)) ([21c2256](https://github.com/supabase/auth/commit/21c2256806ab4950e9bfc0af0472a64f7d9112a7))
+* increase test coverage in conf package to 100% ([#1937](https://github.com/supabase/auth/issues/1937)) ([bc57c1c](https://github.com/supabase/auth/commit/bc57c1c25769905b29bfc9e89bf3d6b65b1030ea))
+
+
+### Bug Fixes
+
+* enable SO_REUSEPORT in listener config ([#1936](https://github.com/supabase/auth/issues/1936)) ([a474b80](https://github.com/supabase/auth/commit/a474b80cc1075eb32a7e72a05b0cdb561e61770b))
+* ignore not found error to check for pkce prefix later ([#1929](https://github.com/supabase/auth/issues/1929)) ([fbbebcc](https://github.com/supabase/auth/commit/fbbebccd5da21ea22323e6f8f853df9168c4c41e))
+* log version & migration count ([#1934](https://github.com/supabase/auth/issues/1934)) ([8078cdc](https://github.com/supabase/auth/commit/8078cdc6f275c97d84c0ba20963327af900b84d0))
+* update figma token endpoint ([#1952](https://github.com/supabase/auth/issues/1952)) ([18fbbb5](https://github.com/supabase/auth/commit/18fbbb53de04c024b6de829e390145a8452d7ab2))
+* use sys/unix instead of syscall ([#1953](https://github.com/supabase/auth/issues/1953)) ([4a6d9bc](https://github.com/supabase/auth/commit/4a6d9bcade28db3c7a6c2c610600665190c9a925))
+
+## [2.169.0](https://github.com/supabase/auth/compare/v2.168.0...v2.169.0) (2025-01-27)
+
+
+### Features
+
+* add an optional burstable rate limiter ([#1924](https://github.com/supabase/auth/issues/1924)) ([1f06f58](https://github.com/supabase/auth/commit/1f06f58e1434b91612c0d96c8c0435d26570f3e2))
+* cover 100% of crypto with tests ([#1892](https://github.com/supabase/auth/issues/1892)) ([174198e](https://github.com/supabase/auth/commit/174198e56f8e9b8470a717d0021c626130288d2e))
+
+
+### Bug Fixes
+
+* convert refreshed_at to UTC before updating ([#1916](https://github.com/supabase/auth/issues/1916)) ([a4c692f](https://github.com/supabase/auth/commit/a4c692f6cb1b8bf4c47ea012872af5ce93382fbf))
+* correct casing of API key authentication in openapi.yaml ([0cfd177](https://github.com/supabase/auth/commit/0cfd177b8fb1df8f62e84fbd3761ef9f90c384de))
+* improve invalid channel error message returned ([#1908](https://github.com/supabase/auth/issues/1908)) ([f72f0ee](https://github.com/supabase/auth/commit/f72f0eee328fa0aa041155f5f5dc305f0874d2bf))
+* improve saml assertion logging ([#1915](https://github.com/supabase/auth/issues/1915)) ([d6030cc](https://github.com/supabase/auth/commit/d6030ccd271a381e2a6ababa11a5beae4b79e5c3))
+
 ## [2.168.0](https://github.com/supabase/auth/compare/v2.167.0...v2.168.0) (2025-01-06)
 
 

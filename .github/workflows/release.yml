@@ -6,6 +6,12 @@ on:
       - master
       - release/*
 
+permissions:
+  contents: write
+  pull-requests: write
+  packages: write
+  id-token: write
+
 jobs:
   release_please:
     runs-on: ubuntu-latest
@@ -76,7 +82,7 @@ jobs:
       - uses: actions/setup-go@v5
         if: ${{ steps.release.outputs.release_created == 'true' || steps.release.outputs.prs_created == 'true' }}
         with:
-          go-version: "^1.22.0" # The Go version to download (if necessary) and use.
+          go-version: "1.23.7" # The Go version to download (if necessary) and use.
 
       - name: Build release artifacts
         if: ${{ steps.release.outputs.release_created == 'true' || steps.release.outputs.prs_created == 'true' }}
