@@ -1,0 +1,1059 @@
+basePath: /
+definitions:
+    AccessTokenResponse:
+        description: AccessTokenResponse represents an OAuth2 success response
+        properties:
+            access_token:
+                type: string
+                x-go-name: Token
+            expires_at:
+                format: int64
+                type: integer
+                x-go-name: ExpiresAt
+            expires_in:
+                format: int64
+                type: integer
+                x-go-name: ExpiresIn
+            provider_refresh_token:
+                type: string
+                x-go-name: ProviderRefreshToken
+            provider_token:
+                type: string
+                x-go-name: ProviderAccessToken
+            refresh_token:
+                type: string
+                x-go-name: RefreshToken
+            token_type:
+                type: string
+                x-go-name: TokenType
+            user:
+                $ref: '#/definitions/User'
+            weak_password:
+                $ref: '#/definitions/WeakPasswordError'
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    AdminListUsersResponse:
+        properties:
+            aud:
+                type: string
+                x-go-name: Aud
+            users:
+                items:
+                    $ref: '#/definitions/User'
+                type: array
+                x-go-name: Users
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    AdminUserParams:
+        properties:
+            app_metadata:
+                additionalProperties: {}
+                type: object
+                x-go-name: AppMetaData
+            aud:
+                type: string
+                x-go-name: Aud
+            ban_duration:
+                type: string
+                x-go-name: BanDuration
+            email:
+                type: string
+                x-go-name: Email
+            email_confirm:
+                type: boolean
+                x-go-name: EmailConfirm
+            id:
+                type: string
+                x-go-name: Id
+            password:
+                type: string
+                x-go-name: Password
+            password_hash:
+                type: string
+                x-go-name: PasswordHash
+            phone:
+                type: string
+                x-go-name: Phone
+            phone_confirm:
+                type: boolean
+                x-go-name: PhoneConfirm
+            role:
+                type: string
+                x-go-name: Role
+            user_metadata:
+                additionalProperties: {}
+                type: object
+                x-go-name: UserMetaData
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    Factor:
+        properties:
+            created_at:
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            factor_type:
+                type: string
+                x-go-name: FactorType
+            friendly_name:
+                type: string
+                x-go-name: FriendlyName
+            id:
+                format: uuid
+                type: string
+                x-go-name: ID
+            last_challenged_at:
+                format: date-time
+                type: string
+                x-go-name: LastChallengedAt
+            phone:
+                $ref: '#/definitions/NullString'
+            status:
+                type: string
+                x-go-name: Status
+            updated_at:
+                format: date-time
+                type: string
+                x-go-name: UpdatedAt
+            web_authn_aaguid:
+                format: uuid
+                type: string
+                x-go-name: WebAuthnAAGUID
+        type: object
+        x-go-package: github.com/supabase/auth/internal/models
+    GenerateLinkParams:
+        properties:
+            data:
+                additionalProperties: {}
+                type: object
+                x-go-name: Data
+            email:
+                type: string
+                x-go-name: Email
+            new_email:
+                type: string
+                x-go-name: NewEmail
+            password:
+                type: string
+                x-go-name: Password
+            redirect_to:
+                type: string
+                x-go-name: RedirectTo
+            type:
+                type: string
+                x-go-name: Type
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    GenerateLinkResponse:
+        properties:
+            action_link:
+                type: string
+                x-go-name: ActionLink
+            app_metadata:
+                $ref: '#/definitions/JSONMap'
+            aud:
+                type: string
+                x-go-name: Aud
+            banned_until:
+                format: date-time
+                type: string
+                x-go-name: BannedUntil
+            confirmation_sent_at:
+                format: date-time
+                type: string
+                x-go-name: ConfirmationSentAt
+            confirmed_at:
+                description: For backward compatibility only. Use EmailConfirmedAt or PhoneConfirmedAt instead.
+                format: date-time
+                type: string
+                x-go-name: ConfirmedAt
+            created_at:
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            deleted_at:
+                format: date-time
+                type: string
+                x-go-name: DeletedAt
+            email:
+                $ref: '#/definitions/NullString'
+            email_change_sent_at:
+                format: date-time
+                type: string
+                x-go-name: EmailChangeSentAt
+            email_confirmed_at:
+                format: date-time
+                type: string
+                x-go-name: EmailConfirmedAt
+            email_otp:
+                type: string
+                x-go-name: EmailOtp
+            factors:
+                items:
+                    $ref: '#/definitions/Factor'
+                type: array
+                x-go-name: Factors
+            hashed_token:
+                type: string
+                x-go-name: HashedToken
+            id:
+                format: uuid
+                type: string
+                x-go-name: ID
+            identities:
+                items:
+                    $ref: '#/definitions/Identity'
+                type: array
+                x-go-name: Identities
+            invited_at:
+                format: date-time
+                type: string
+                x-go-name: InvitedAt
+            is_anonymous:
+                type: boolean
+                x-go-name: IsAnonymous
+            last_sign_in_at:
+                format: date-time
+                type: string
+                x-go-name: LastSignInAt
+            new_email:
+                type: string
+                x-go-name: EmailChange
+            new_phone:
+                type: string
+                x-go-name: PhoneChange
+            phone:
+                $ref: '#/definitions/NullString'
+            phone_change_sent_at:
+                format: date-time
+                type: string
+                x-go-name: PhoneChangeSentAt
+            phone_confirmed_at:
+                format: date-time
+                type: string
+                x-go-name: PhoneConfirmedAt
+            reauthentication_sent_at:
+                format: date-time
+                type: string
+                x-go-name: ReauthenticationSentAt
+            recovery_sent_at:
+                format: date-time
+                type: string
+                x-go-name: RecoverySentAt
+            redirect_to:
+                type: string
+                x-go-name: RedirectTo
+            role:
+                type: string
+                x-go-name: Role
+            updated_at:
+                format: date-time
+                type: string
+                x-go-name: UpdatedAt
+            user_metadata:
+                $ref: '#/definitions/JSONMap'
+            verification_type:
+                type: string
+                x-go-name: VerificationType
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    HealthCheckResponse:
+        properties:
+            description:
+                type: string
+                x-go-name: Description
+            name:
+                type: string
+                x-go-name: Name
+            version:
+                type: string
+                x-go-name: Version
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    Identity:
+        properties:
+            created_at:
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            email:
+                $ref: '#/definitions/NullString'
+            id:
+                description: |-
+                    returned as id in JSON for backward compatibility with the interface exposed by the client library
+                    see https://github.com/supabase/gotrue-js/blob/c9296bbc27a2f036af55c1f33fca5930704bd021/src/lib/types.ts#L230-L240
+                type: string
+                x-go-name: ProviderID
+            identity_data:
+                $ref: '#/definitions/JSONMap'
+            identity_id:
+                description: |-
+                    returned as identity_id in JSON for backward compatibility with the interface exposed by the client library
+                    see https://github.com/supabase/gotrue-js/blob/c9296bbc27a2f036af55c1f33fca5930704bd021/src/lib/types.ts#L230-L240
+                format: uuid
+                type: string
+                x-go-name: ID
+            last_sign_in_at:
+                format: date-time
+                type: string
+                x-go-name: LastSignInAt
+            provider:
+                type: string
+                x-go-name: Provider
+            updated_at:
+                format: date-time
+                type: string
+                x-go-name: UpdatedAt
+            user_id:
+                format: uuid
+                type: string
+                x-go-name: UserID
+        type: object
+        x-go-package: github.com/supabase/auth/internal/models
+    InviteParams:
+        description: InviteParams are the parameters the Signup endpoint accepts
+        properties:
+            data:
+                additionalProperties: {}
+                type: object
+                x-go-name: Data
+            email:
+                type: string
+                x-go-name: Email
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    JSONMap:
+        additionalProperties: {}
+        type: object
+        x-go-package: github.com/supabase/auth/internal/models
+    NullString:
+        type: string
+        x-go-package: github.com/supabase/auth/internal/storage
+    OtpParams:
+        description: OtpParams contains the request body params for the otp endpoint
+        properties:
+            channel:
+                type: string
+                x-go-name: Channel
+            code_challenge:
+                type: string
+                x-go-name: CodeChallenge
+            code_challenge_method:
+                type: string
+                x-go-name: CodeChallengeMethod
+            create_user:
+                type: boolean
+                x-go-name: CreateUser
+            data:
+                additionalProperties: {}
+                type: object
+                x-go-name: Data
+            email:
+                type: string
+                x-go-name: Email
+            phone:
+                type: string
+                x-go-name: Phone
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    PasswordGrantParams:
+        description: PasswordGrantParams are the parameters the ResourceOwnerPasswordGrant method accepts
+        properties:
+            email:
+                type: string
+                x-go-name: Email
+            password:
+                type: string
+                x-go-name: Password
+            phone:
+                type: string
+                x-go-name: Phone
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    ProviderSettings:
+        properties:
+            anonymous_users:
+                type: boolean
+                x-go-name: AnonymousUsers
+            apple:
+                type: boolean
+                x-go-name: Apple
+            azure:
+                type: boolean
+                x-go-name: Azure
+            bitbucket:
+                type: boolean
+                x-go-name: Bitbucket
+            discord:
+                type: boolean
+                x-go-name: Discord
+            email:
+                type: boolean
+                x-go-name: Email
+            facebook:
+                type: boolean
+                x-go-name: Facebook
+            figma:
+                type: boolean
+                x-go-name: Figma
+            fly:
+                type: boolean
+                x-go-name: Fly
+            github:
+                type: boolean
+                x-go-name: GitHub
+            gitlab:
+                type: boolean
+                x-go-name: GitLab
+            google:
+                type: boolean
+                x-go-name: Google
+            kakao:
+                type: boolean
+                x-go-name: Kakao
+            keycloak:
+                type: boolean
+                x-go-name: Keycloak
+            linkedin:
+                type: boolean
+                x-go-name: Linkedin
+            linkedin_oidc:
+                type: boolean
+                x-go-name: LinkedinOIDC
+            notion:
+                type: boolean
+                x-go-name: Notion
+            phone:
+                type: boolean
+                x-go-name: Phone
+            slack:
+                type: boolean
+                x-go-name: Slack
+            slack_oidc:
+                type: boolean
+                x-go-name: SlackOIDC
+            spotify:
+                type: boolean
+                x-go-name: Spotify
+            twitch:
+                type: boolean
+                x-go-name: Twitch
+            twitter:
+                type: boolean
+                x-go-name: Twitter
+            workos:
+                type: boolean
+                x-go-name: WorkOS
+            zoom:
+                type: boolean
+                x-go-name: Zoom
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    RecoverParams:
+        description: RecoverParams holds the parameters for a password recovery request
+        properties:
+            code_challenge:
+                type: string
+                x-go-name: CodeChallenge
+            code_challenge_method:
+                type: string
+                x-go-name: CodeChallengeMethod
+            email:
+                type: string
+                x-go-name: Email
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    RefreshTokenGrantParams:
+        description: RefreshTokenGrantParams are the parameters the RefreshTokenGrant method accepts
+        properties:
+            refresh_token:
+                type: string
+                x-go-name: RefreshToken
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    Settings:
+        properties:
+            disable_signup:
+                type: boolean
+                x-go-name: DisableSignup
+            external:
+                $ref: '#/definitions/ProviderSettings'
+            mailer_autoconfirm:
+                type: boolean
+                x-go-name: MailerAutoconfirm
+            phone_autoconfirm:
+                type: boolean
+                x-go-name: PhoneAutoconfirm
+            saml_enabled:
+                type: boolean
+                x-go-name: SAMLEnabled
+            sms_provider:
+                type: string
+                x-go-name: SmsProvider
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    SignupParams:
+        description: SignupParams are the parameters the Signup endpoint accepts
+        properties:
+            channel:
+                type: string
+                x-go-name: Channel
+            code_challenge:
+                type: string
+                x-go-name: CodeChallenge
+            code_challenge_method:
+                type: string
+                x-go-name: CodeChallengeMethod
+            data:
+                additionalProperties: {}
+                type: object
+                x-go-name: Data
+            email:
+                type: string
+                x-go-name: Email
+            password:
+                type: string
+                x-go-name: Password
+            phone:
+                type: string
+                x-go-name: Phone
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    User:
+        description: User respresents a registered user with email/password authentication
+        properties:
+            app_metadata:
+                $ref: '#/definitions/JSONMap'
+            aud:
+                type: string
+                x-go-name: Aud
+            banned_until:
+                format: date-time
+                type: string
+                x-go-name: BannedUntil
+            confirmation_sent_at:
+                format: date-time
+                type: string
+                x-go-name: ConfirmationSentAt
+            confirmed_at:
+                description: For backward compatibility only. Use EmailConfirmedAt or PhoneConfirmedAt instead.
+                format: date-time
+                type: string
+                x-go-name: ConfirmedAt
+            created_at:
+                format: date-time
+                type: string
+                x-go-name: CreatedAt
+            deleted_at:
+                format: date-time
+                type: string
+                x-go-name: DeletedAt
+            email:
+                $ref: '#/definitions/NullString'
+            email_change_sent_at:
+                format: date-time
+                type: string
+                x-go-name: EmailChangeSentAt
+            email_confirmed_at:
+                format: date-time
+                type: string
+                x-go-name: EmailConfirmedAt
+            factors:
+                items:
+                    $ref: '#/definitions/Factor'
+                type: array
+                x-go-name: Factors
+            id:
+                format: uuid
+                type: string
+                x-go-name: ID
+            identities:
+                items:
+                    $ref: '#/definitions/Identity'
+                type: array
+                x-go-name: Identities
+            invited_at:
+                format: date-time
+                type: string
+                x-go-name: InvitedAt
+            is_anonymous:
+                type: boolean
+                x-go-name: IsAnonymous
+            last_sign_in_at:
+                format: date-time
+                type: string
+                x-go-name: LastSignInAt
+            new_email:
+                type: string
+                x-go-name: EmailChange
+            new_phone:
+                type: string
+                x-go-name: PhoneChange
+            phone:
+                $ref: '#/definitions/NullString'
+            phone_change_sent_at:
+                format: date-time
+                type: string
+                x-go-name: PhoneChangeSentAt
+            phone_confirmed_at:
+                format: date-time
+                type: string
+                x-go-name: PhoneConfirmedAt
+            reauthentication_sent_at:
+                format: date-time
+                type: string
+                x-go-name: ReauthenticationSentAt
+            recovery_sent_at:
+                format: date-time
+                type: string
+                x-go-name: RecoverySentAt
+            role:
+                type: string
+                x-go-name: Role
+            updated_at:
+                format: date-time
+                type: string
+                x-go-name: UpdatedAt
+            user_metadata:
+                $ref: '#/definitions/JSONMap'
+        type: object
+        x-go-package: github.com/supabase/auth/internal/models
+    UserUpdateParams:
+        description: UserUpdateParams parameters for updating a user
+        properties:
+            app_metadata:
+                additionalProperties: {}
+                type: object
+                x-go-name: AppData
+            channel:
+                type: string
+                x-go-name: Channel
+            code_challenge:
+                type: string
+                x-go-name: CodeChallenge
+            code_challenge_method:
+                type: string
+                x-go-name: CodeChallengeMethod
+            data:
+                additionalProperties: {}
+                type: object
+                x-go-name: Data
+            email:
+                type: string
+                x-go-name: Email
+            nonce:
+                type: string
+                x-go-name: Nonce
+            password:
+                type: string
+                x-go-name: Password
+            phone:
+                type: string
+                x-go-name: Phone
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    VerifyParams:
+        description: VerifyParams are the parameters the Verify endpoint accepts
+        properties:
+            email:
+                type: string
+                x-go-name: Email
+            phone:
+                type: string
+                x-go-name: Phone
+            redirect_to:
+                type: string
+                x-go-name: RedirectTo
+            token:
+                type: string
+                x-go-name: Token
+            token_hash:
+                type: string
+                x-go-name: TokenHash
+            type:
+                type: string
+                x-go-name: Type
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+    WeakPasswordError:
+        description: |-
+            WeakPasswordError encodes an error that a password does not meet strength
+            requirements. It is handled specially in errors.go as it gets transformed to
+            a HTTPError with a special weak_password field that encodes the Reasons
+            slice.
+        properties:
+            message:
+                type: string
+                x-go-name: Message
+            reasons:
+                items:
+                    type: string
+                type: array
+                x-go-name: Reasons
+        type: object
+        x-go-package: github.com/supabase/auth/internal/api
+host: localhost:9999
+info:
+    description: Documentation of the gotrue API.
+    title: gotrue
+    version: 1.0.0
+paths:
+    /admin/generate_link:
+        post:
+            operationId: admin-generate-link
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/GenerateLinkParams'
+            responses:
+                "200":
+                    $ref: '#/responses/generateLinkResponse'
+                "401":
+                    $ref: '#/responses/unauthorizedError'
+            security:
+                - bearer: []
+            summary: Generates an email action link.
+            tags:
+                - admin
+    /admin/user/{user_id}:
+        delete:
+            operationId: admin-delete-user
+            parameters:
+                - description: The user's id
+                  in: path
+                  name: user_id
+                  required: true
+            responses:
+                "200":
+                    $ref: '#/responses/deleteUserResponse'
+                "401":
+                    $ref: '#/responses/unauthorizedError'
+            security:
+                - bearer: []
+            summary: Deletes a user.
+            tags:
+                - admin
+        get:
+            operationId: admin-get-user
+            parameters:
+                - description: The user's id
+                  in: path
+                  name: user_id
+                  required: true
+            responses:
+                "200":
+                    $ref: '#/responses/userResponse'
+                "401":
+                    $ref: '#/responses/unauthorizedError'
+            security:
+                - bearer: []
+            summary: Get a user.
+            tags:
+                - admin
+        put:
+            operationId: admin-update-user
+            parameters:
+                - description: The user's id
+                  in: path
+                  name: user_id
+                  required: true
+            responses:
+                "200":
+                    $ref: '#/responses/userResponse'
+                "401":
+                    $ref: '#/responses/unauthorizedError'
+            security:
+                - bearer: []
+            summary: Update a user.
+            tags:
+                - admin
+    /admin/users:
+        get:
+            operationId: admin-list-users
+            responses:
+                "200":
+                    $ref: '#/responses/adminListUserResponse'
+                "401":
+                    $ref: '#/responses/unauthorizedError'
+            security:
+                - bearer: []
+            summary: List all users.
+            tags:
+                - admin
+        post:
+            operationId: admin-create-user
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/AdminUserParams'
+            responses:
+                "200":
+                    $ref: '#/responses/userResponse'
+                "401":
+                    $ref: '#/responses/unauthorizedError'
+            security:
+                - bearer: []
+            summary: Returns the created user.
+            tags:
+                - admin
+    /authorize:
+        get:
+            operationId: authorize
+            parameters:
+                - description: The redirect url to return the user to after the `/callback` endpoint has completed.
+                  in: query
+                  name: redirect_to
+            responses:
+                "302":
+                    $ref: '#/responses/authorizeResponse'
+            summary: Redirects the user to the 3rd-party OAuth provider to start the OAuth1.0 or OAuth2.0 authentication process.
+            tags:
+                - oauth
+    /callback:
+        get:
+            operationId: callback
+            responses:
+                "302":
+                    $ref: '#/responses/callbackResponse'
+            summary: Receives the redirect from an external provider during the OAuth authentication process. Starts the process of creating an access and refresh token.
+            tags:
+                - oauth
+    /health:
+        get:
+            operationId: health
+            responses:
+                "200":
+                    $ref: '#/responses/healthCheckResponse'
+            summary: The healthcheck endpoint for gotrue. Returns the current gotrue version.
+            tags:
+                - health
+    /invite:
+        post:
+            operationId: invite
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/InviteParams'
+            responses:
+                "200":
+                    $ref: '#/responses/inviteResponse'
+            summary: Sends an invite link to the user.
+            tags:
+                - invite
+    /logout:
+        post:
+            operationId: logout
+            responses:
+                "204":
+                    $ref: '#/responses/logoutResponse'
+            security:
+                - bearer: []
+            summary: Logs out the user.
+            tags:
+                - logout
+    /otp:
+        post:
+            operationId: otp
+            parameters:
+                - description: Only an email or phone should be provided.
+                  in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/OtpParams'
+            responses:
+                "200":
+                    $ref: '#/responses/otpResponse'
+            summary: Passwordless sign-in method for email or phone.
+            tags:
+                - otp
+    /recover:
+        post:
+            operationId: recovery
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/RecoverParams'
+            responses:
+                "200":
+                    $ref: '#/responses/recoveryResponse'
+            summary: Sends a password recovery email link to the user's email.
+            tags:
+                - recovery
+    /settings:
+        get:
+            operationId: settings
+            responses:
+                "200":
+                    $ref: '#/responses/settingsResponse'
+            summary: Returns the configuration settings for the gotrue server.
+            tags:
+                - settings
+    /signup:
+        post:
+            operationId: signup
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/SignupParams'
+            responses:
+                "200":
+                    $ref: '#/responses/userResponse'
+            summary: Password-based signup with either email or phone.
+            tags:
+                - signup
+    /token?grant_type=password:
+        post:
+            operationId: token-password
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/PasswordGrantParams'
+            responses:
+                "200":
+                    $ref: '#/responses/tokenResponse'
+            summary: Signs in a user with a password.
+            tags:
+                - token
+    /token?grant_type=refresh_token:
+        post:
+            operationId: token-refresh
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/RefreshTokenGrantParams'
+            responses:
+                "200":
+                    $ref: '#/responses/tokenResponse'
+            summary: Refreshes a user's refresh token.
+            tags:
+                - token
+    /user:
+        get:
+            operationId: user-get
+            responses:
+                "200":
+                    $ref: '#/responses/userResponse'
+                "401":
+                    $ref: '#/responses/unauthorizedError'
+            security:
+                - bearer: []
+            summary: Get information for the logged-in user.
+            tags:
+                - user
+        put:
+            operationId: user-put
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/UserUpdateParams'
+            responses:
+                "200":
+                    $ref: '#/responses/userResponse'
+                "401":
+                    $ref: '#/responses/unauthorizedError'
+            security:
+                - bearer: []
+            summary: Returns the updated user.
+            tags:
+                - user
+    /verify:
+        get:
+            operationId: verify-get
+            parameters:
+                - in: query
+                  name: type
+                  type: string
+                  x-go-name: Type
+                - in: query
+                  name: token
+                  type: string
+                  x-go-name: Token
+                - in: query
+                  name: token_hash
+                  type: string
+                  x-go-name: TokenHash
+                - in: query
+                  name: email
+                  type: string
+                  x-go-name: Email
+                - in: query
+                  name: phone
+                  type: string
+                  x-go-name: Phone
+                - in: query
+                  name: redirect_to
+                  type: string
+                  x-go-name: RedirectTo
+            summary: Verifies a sign up.
+            tags:
+                - verify
+        post:
+            operationId: verify-post
+            parameters:
+                - in: body
+                  name: Body
+                  schema:
+                    $ref: '#/definitions/VerifyParams'
+            summary: Verifies a sign up.
+            tags:
+                - verify
+produces:
+    - application/json
+responses:
+    adminListUserResponse:
+        description: The list of users.
+        schema:
+            $ref: '#/definitions/AdminListUsersResponse'
+    authorizeResponse:
+        description: Redirects user to the 3rd-party OAuth provider
+    callbackResponse:
+        description: Redirects user to the redirect url specified in `/authorize`. If no `redirect_url` is provided, the user will be redirected to the `SITE_URL`.
+    deleteUserResponse:
+        description: The updated user.
+    generateLinkResponse:
+        description: The response object for generate link.
+        schema:
+            $ref: '#/definitions/GenerateLinkResponse'
+    healthCheckResponse:
+        description: ""
+        schema:
+            $ref: '#/definitions/HealthCheckResponse'
+    inviteResponse:
+        description: ""
+    logoutResponse:
+        description: ""
+    otpResponse:
+        description: ""
+    recoveryResponse:
+        description: ""
+    settingsResponse:
+        description: ""
+        schema:
+            $ref: '#/definitions/Settings'
+    tokenResponse:
+        description: ""
+        schema:
+            $ref: '#/definitions/AccessTokenResponse'
+    unauthorizedError:
+        description: This endpoint requires a bearer token.
+    userResponse:
+        description: The current user.
+        schema:
+            $ref: '#/definitions/User'
+schemes:
+    - http
+    - https
+securityDefinitions:
+    bearer:
+        in: header
+        name: Authentication
+        type: apiKey
+swagger: "2.0"
