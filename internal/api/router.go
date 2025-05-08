@@ -63,7 +63,11 @@ func handler(fn apiHandler) http.HandlerFunc {
 
 func (h apiHandler) serve(w http.ResponseWriter, r *http.Request) {
 	if err := h(w, r); err != nil {
-		HandleResponseError(err, w, r)
+		// 业务要求不返回内部错误，所以这里用一个自定义的错误处理函数
+		HandleResponseError_YuZhaGai(err, w, r)
+
+		// 如果需要返回内部错误，请使用以下代码, 这是原来的错误处理函数
+		// HandleResponseError(err, w, r)
 	}
 }
 
