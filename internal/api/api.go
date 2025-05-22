@@ -158,7 +158,7 @@ func NewAPIWithVersion(globalConfig *conf.GlobalConfiguration, db *storage.Conne
 		r.Get("/authorize", api.ExternalProviderRedirect)
 
 		r.With(api.requireAdminCredentials).Post("/invite", api.Invite)
-		r.With(api.verifyCaptcha).Route("/signup", func(r *router) {
+		r.With(api.verifyCaptcha).With(api.verifyYuZhaLabCode).Route("/signup", func(r *router) {
 			// rate limit per hour
 			limitAnonymousSignIns := api.limiterOpts.AnonymousSignIns
 			limitSignups := api.limiterOpts.Signups
