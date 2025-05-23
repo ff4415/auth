@@ -1,23 +1,32 @@
 package api
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"net/http"
 	"strings"
 
+	"github.com/pkg/errors"
 	"github.com/supabase/auth/internal/api/apierrors"
 	"github.com/supabase/auth/internal/security"
+	"github.com/supabase/auth/internal/utilities"
 )
 
 func (a *API) verifyYuZhaLabCode(w http.ResponseWriter, req *http.Request) (context.Context, error) {
 	ctx := req.Context()
 
-	body := &security.YuZhaLabRequest{}
-	if err := security.RetrieveYuZhaLabRequestParams(req, body); err != nil {
+	// body := &security.YuZhaLabRequest{}
+	// if err := security.RetrieveYuZhaLabRequestParams(req, body); err != nil {
+	// 	return nil, err
+	// }
+
+	body := &SignupParams{}
+	if err := retrieveRequestParams(req, body); err != nil {
 		return nil, err
 	}
 
-	verificationResult, err := security.VerifyYuZhaLabRequest(body)
+	verificationResult, err := VerifyYuZhaLabRequest(body)
 	if err != nil {
 		return nil, apierrors.NewInternalServerError("yuzha lab code verification process failed").WithInternalError(err)
 	}
@@ -27,4 +36,78 @@ func (a *API) verifyYuZhaLabCode(w http.ResponseWriter, req *http.Request) (cont
 	}
 
 	return ctx, nil
+}
+
+func VerifyYuZhaLabRequest(requestBody *SignupParams) (security.VerificationResponse, error) {
+	if requestBody.Data == nil {
+		return security.VerificationResponse{}, errors.New("request data is nil")
+	}
+
+	codeValue, exists := requestBody.Data["verify_code"]
+	if !exists {
+		return security.VerificationResponse{}, errors.New("code not found in request data")
+	}
+
+	codeResponse, ok := codeValue.(string)
+	if !ok {
+		return security.VerificationResponse{}, errors.New("code is not a string")
+	}
+
+	codeResponse = strings.TrimSpace(codeResponse)
+	if codeResponse == "" {
+		return security.VerificationResponse{}, errors.New("no code found in request")
+	}
+	email := strings.TrimSpace(requestBody.Email)
+	phone := strings.TrimSpace(requestBody.Phone)
+
+	if codeResponse == "" {
+		return security.VerificationResponse{}, errors.New("no captcha response (captcha_token) found in request")
+	}
+	if email == "" && phone == "" {
+		return security.VerificationResponse{}, apierrors.NewBadRequestError(apierrors.ErrorCodeValidationFailed, "email or phone is required")
+	}
+
+	if email != "" && phone != "" {
+		return security.VerificationResponse{}, apierrors.NewBadRequestError(apierrors.ErrorCodeValidationFailed, "email and phone cannot both be provided")
+	}
+
+	b := make(map[string]string)
+
+	if email != "" {
+		b["email"] = email
+	} else if phone != "" {
+		b["phone"] = phone
+	}
+	b["code"] = codeResponse
+
+	// 将请求体转换为JSON
+	jsonData, err := json.Marshal(b)
+	if err != nil {
+		return security.VerificationResponse{}, errors.Wrap(err, "failed to marshal JSON")
+	}
+
+	// 创建POST请求
+	url := "http://127.0.0.1:8889/v1/verify/verifycode"
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonData))
+	if err != nil {
+		return security.VerificationResponse{}, errors.Wrap(err, "couldn't initialize request object for captcha check")
+	}
+
+	// 设置请求头
+	req.Header.Set("Content-Type", "application/json")
+
+	// 发送请求
+	res, err := security.Client.Do(req)
+	if err != nil {
+		return security.VerificationResponse{}, errors.Wrap(err, "failed to verify captcha response")
+	}
+	defer utilities.SafeClose(res.Body)
+
+	var verificationResponse security.VerificationResponse
+
+	if err := json.NewDecoder(res.Body).Decode(&verificationResponse); err != nil {
+		return security.VerificationResponse{}, errors.Wrap(err, "failed to decode captcha response: not JSON")
+	}
+
+	return verificationResponse, nil
 }
