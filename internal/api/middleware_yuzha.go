@@ -28,7 +28,7 @@ func (a *API) verifyYuZhaLabCode(w http.ResponseWriter, req *http.Request) (cont
 
 	verificationResult, err := VerifyYuZhaLabRequest(body)
 	if err != nil {
-		return nil, apierrors.NewInternalServerError("yuzha lab code verification process failed").WithInternalError(err)
+		return nil, apierrors.NewBadRequestError(apierrors.ErrorCodeCaptchaFailed, "yuzha lab code verification process failed ", err.Error())
 	}
 
 	if !verificationResult.Success {
