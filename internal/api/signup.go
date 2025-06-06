@@ -70,6 +70,7 @@ func (p *SignupParams) ConfigureDefaults() {
 	if p.Phone != "" && p.Channel == "" {
 		p.Channel = sms_provider.SMSProvider
 	}
+	p.ConfigureDefaultsYuzha()
 }
 
 func (params *SignupParams) ToUserModel(isSSOUser bool) (user *models.User, err error) {
