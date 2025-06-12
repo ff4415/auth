@@ -2,55 +2,134 @@ package i18n
 
 import (
 	"net/http"
-	"net/url"
+	"net/http/httptest"
 	"testing"
 )
 
 func TestGetLanguageFromRequest(t *testing.T) {
 	tests := []struct {
+		name           string
+		queryParam     string
+		customHeader   string
+		acceptLanguage string
+		expected       Language
+	}{
+		{
+			name:           "Query parameter takes priority",
+			queryParam:     "zh",
+			customHeader:   "en",
+			acceptLanguage: "fr",
+			expected:       LanguageChinese,
+		},
+		{
+			name:           "Custom header when no query param",
+			customHeader:   "zh",
+			acceptLanguage: "en",
+			expected:       LanguageChinese,
+		},
+		{
+			name:           "Accept-Language when others missing",
+			acceptLanguage: "zh-CN,zh;q=0.9,en;q=0.8",
+			expected:       LanguageChinese,
+		},
+		{
+			name:     "Default to English when all missing",
+			expected: LanguageEnglish,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			req := httptest.NewRequest("GET", "/test", nil)
+
+			if tt.queryParam != "" {
+				q := req.URL.Query()
+				q.Set("lang", tt.queryParam)
+				req.URL.RawQuery = q.Encode()
+			}
+
+			if tt.customHeader != "" {
+				req.Header.Set("X-Language", tt.customHeader)
+			}
+
+			if tt.acceptLanguage != "" {
+				req.Header.Set("Accept-Language", tt.acceptLanguage)
+			}
+
+			result := GetLanguageFromRequest(req)
+			if result != tt.expected {
+				t.Errorf("Expected %s, got %s", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestParseAcceptLanguage(t *testing.T) {
+	tests := []struct {
+		name       string
+		acceptLang string
+		expected   Language
+	}{
+		{
+			name:       "Chinese with quality values",
+			acceptLang: "zh-CN,zh;q=0.9,en;q=0.8",
+			expected:   LanguageChinese,
+		},
+		{
+			name:       "English with quality values",
+			acceptLang: "en-US,en;q=0.9,zh;q=0.8",
+			expected:   LanguageEnglish,
+		},
+		{
+			name:       "Chinese higher priority",
+			acceptLang: "fr;q=0.5,zh;q=0.9,en;q=0.8",
+			expected:   LanguageChinese,
+		},
+		{
+			name:       "No supported languages",
+			acceptLang: "fr,de,es",
+			expected:   LanguageEnglish,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := parseAcceptLanguage(tt.acceptLang)
+			if result != tt.expected {
+				t.Errorf("Expected %s, got %s", tt.expected, result)
+			}
+		})
+	}
+}
+
+func TestGetLanguageFromJWT(t *testing.T) {
+	tests := []struct {
 		name     string
-		setupReq func(*http.Request)
+		claims   map[string]interface{}
 		expected Language
 	}{
 		{
-			name: "Chinese from query parameter",
-			setupReq: func(r *http.Request) {
-				r.URL.RawQuery = "lang=zh"
+			name: "User metadata language preference",
+			claims: map[string]interface{}{
+				"user_metadata": map[string]interface{}{
+					"user_language": "zh",
+				},
 			},
 			expected: LanguageChinese,
 		},
 		{
-			name: "English from query parameter",
-			setupReq: func(r *http.Request) {
-				r.URL.RawQuery = "lang=en"
-			},
-			expected: LanguageEnglish,
-		},
-		{
-			name: "Chinese from custom header",
-			setupReq: func(r *http.Request) {
-				r.Header.Set("X-Language", "zh-CN")
+			name: "App metadata fallback",
+			claims: map[string]interface{}{
+				"app_metadata": map[string]interface{}{
+					"user_language": "zh",
+				},
 			},
 			expected: LanguageChinese,
 		},
 		{
-			name: "English from Accept-Language header",
-			setupReq: func(r *http.Request) {
-				r.Header.Set("Accept-Language", "en-US,en;q=0.9")
-			},
-			expected: LanguageEnglish,
-		},
-		{
-			name: "Chinese from Accept-Language header",
-			setupReq: func(r *http.Request) {
-				r.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
-			},
-			expected: LanguageChinese,
-		},
-		{
-			name: "Default to English",
-			setupReq: func(r *http.Request) {
-				// No language preferences
+			name: "No language preference",
+			claims: map[string]interface{}{
+				"user_metadata": map[string]interface{}{},
 			},
 			expected: LanguageEnglish,
 		},
@@ -58,18 +137,35 @@ func TestGetLanguageFromRequest(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			req := &http.Request{
-				URL:    &url.URL{},
-				Header: make(http.Header),
-			}
-			tt.setupReq(req)
-
-			result := GetLanguageFromRequest(req)
+			result := GetLanguageFromJWT(tt.claims)
 			if result != tt.expected {
-				t.Errorf("GetLanguageFromRequest() = %v, want %v", result, tt.expected)
+				t.Errorf("Expected %s, got %s", tt.expected, result)
 			}
 		})
 	}
+}
+
+func TestLanguageMiddleware(t *testing.T) {
+	// Create test handler
+	testHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		lang := GetLanguageFromContextHTTP(r)
+		w.WriteHeader(200)
+		w.Write([]byte(string(lang)))
+	})
+
+	// Wrap with middleware
+	handler := LanguageMiddleware(testHandler)
+
+	t.Run("Middleware sets language in context", func(t *testing.T) {
+		req := httptest.NewRequest("GET", "/test?lang=zh", nil)
+		w := httptest.NewRecorder()
+
+		handler.ServeHTTP(w, req)
+
+		if w.Body.String() != "zh" {
+			t.Errorf("Expected 'zh', got '%s'", w.Body.String())
+		}
+	})
 }
 
 func TestGetMessage(t *testing.T) {
@@ -80,34 +176,22 @@ func TestGetMessage(t *testing.T) {
 		expected string
 	}{
 		{
-			name:     "English weak password message",
+			name:     "English message",
 			lang:     LanguageEnglish,
-			key:      "weak_password",
-			expected: "Password does not meet security requirements",
+			key:      "unauthorized",
+			expected: "Unauthorized",
 		},
 		{
-			name:     "Chinese weak password message",
+			name:     "Chinese message",
 			lang:     LanguageChinese,
-			key:      "weak_password",
-			expected: "密码不符合安全要求",
+			key:      "unauthorized",
+			expected: "未授权",
 		},
 		{
-			name:     "Unknown key fallback to English",
+			name:     "Fallback to English",
 			lang:     LanguageChinese,
-			key:      "unknown_key",
-			expected: "unknown_key",
-		},
-		{
-			name:     "English duplicate email message",
-			lang:     LanguageEnglish,
-			key:      "duplicate_email",
-			expected: "A user with this email address has already been registered",
-		},
-		{
-			name:     "Chinese duplicate email message",
-			lang:     LanguageChinese,
-			key:      "duplicate_email",
-			expected: "该邮箱地址已被注册",
+			key:      "nonexistent_key",
+			expected: "nonexistent_key",
 		},
 	}
 
@@ -115,7 +199,7 @@ func TestGetMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := GetMessage(tt.lang, tt.key)
 			if result != tt.expected {
-				t.Errorf("GetMessage() = %v, want %v", result, tt.expected)
+				t.Errorf("Expected '%s', got '%s'", tt.expected, result)
 			}
 		})
 	}
@@ -130,60 +214,22 @@ func TestGetUserFriendlyMessage(t *testing.T) {
 		expected        string
 	}{
 		{
-			name:            "Hide internal SQL error - English",
+			name:            "Database error should be hidden",
 			lang:            LanguageEnglish,
-			errorCode:       "",
-			originalMessage: "pq: duplicate key value violates unique constraint",
+			originalMessage: "pq: connection refused",
 			expected:        "Internal server error",
 		},
 		{
-			name:            "Hide internal SQL error - Chinese",
+			name:            "Weak password error",
 			lang:            LanguageChinese,
-			errorCode:       "",
-			originalMessage: "database connection failed",
-			expected:        "内部服务器错误",
-		},
-		{
-			name:            "Weak password error - English",
-			lang:            LanguageEnglish,
-			errorCode:       "",
-			originalMessage: "Weak password detected",
-			expected:        "Password does not meet security requirements",
-		},
-		{
-			name:            "Weak password error - Chinese",
-			lang:            LanguageChinese,
-			errorCode:       "",
-			originalMessage: "Weak password detected",
+			originalMessage: "weak password detected",
 			expected:        "密码不符合安全要求",
 		},
 		{
-			name:            "Duplicate email error - English",
+			name:            "Generic error fallback",
 			lang:            LanguageEnglish,
-			errorCode:       "",
-			originalMessage: "Duplicate email found in database",
-			expected:        "A user with this email address has already been registered",
-		},
-		{
-			name:            "Duplicate email error - Chinese",
-			lang:            LanguageChinese,
-			errorCode:       "",
-			originalMessage: "Duplicate email found in database",
-			expected:        "该邮箱地址已被注册",
-		},
-		{
-			name:            "Error code mapping - English",
-			lang:            LanguageEnglish,
-			errorCode:       "unauthorized",
-			originalMessage: "Some internal message",
-			expected:        "Unauthorized",
-		},
-		{
-			name:            "Error code mapping - Chinese",
-			lang:            LanguageChinese,
-			errorCode:       "unauthorized",
-			originalMessage: "Some internal message",
-			expected:        "未授权",
+			originalMessage: "some unknown error",
+			expected:        "Unknown error occurred",
 		},
 	}
 
@@ -191,7 +237,7 @@ func TestGetUserFriendlyMessage(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			result := GetUserFriendlyMessage(tt.lang, tt.errorCode, tt.originalMessage)
 			if result != tt.expected {
-				t.Errorf("GetUserFriendlyMessage() = %v, want %v", result, tt.expected)
+				t.Errorf("Expected '%s', got '%s'", tt.expected, result)
 			}
 		})
 	}

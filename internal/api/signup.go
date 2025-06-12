@@ -70,7 +70,6 @@ func (p *SignupParams) ConfigureDefaults() {
 	if p.Phone != "" && p.Channel == "" {
 		p.Channel = sms_provider.SMSProvider
 	}
-	p.ConfigureDefaultsYuzha()
 }
 
 func (params *SignupParams) ToUserModel(isSSOUser bool) (user *models.User, err error) {
@@ -123,6 +122,7 @@ func (a *API) Signup(w http.ResponseWriter, r *http.Request) error {
 	}
 
 	params.ConfigureDefaults()
+	params.ConfigureDefaultsYuzhaWithContext(r)
 
 	if err := a.validateSignupParams(ctx, params); err != nil {
 		return err

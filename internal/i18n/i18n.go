@@ -2,6 +2,8 @@ package i18n
 
 import (
 	"net/http"
+	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -76,13 +78,7 @@ func GetLanguageFromRequest(r *http.Request) Language {
 	// Check Accept-Language header
 	acceptLang := r.Header.Get("Accept-Language")
 	if acceptLang != "" {
-		// Parse Accept-Language header (simplified)
-		langs := strings.Split(acceptLang, ",")
-		if len(langs) > 0 {
-			// Take the first language and normalize it
-			lang := strings.TrimSpace(strings.Split(langs[0], ";")[0])
-			return normalizeLanguage(lang)
-		}
+		return parseAcceptLanguage(acceptLang)
 	}
 
 	// Default to English
@@ -181,4 +177,59 @@ func GetUserFriendlyMessage(lang Language, errorCode string, originalMessage str
 		// For any other error, return a generic message to hide internal details
 		return GetMessage(lang, "unknown_error")
 	}
+}
+
+// parseAcceptLanguage parses Accept-Language header with quality values
+func parseAcceptLanguage(acceptLang string) Language {
+	type langQuality struct {
+		lang    string
+		quality float64
+	}
+
+	var languages []langQuality
+
+	// Split by comma to get individual language preferences
+	parts := strings.Split(acceptLang, ",")
+
+	for _, part := range parts {
+		part = strings.TrimSpace(part)
+
+		// Split by semicolon to separate language from quality
+		langParts := strings.Split(part, ";")
+		lang := strings.TrimSpace(langParts[0])
+		quality := 1.0 // Default quality
+
+		// Parse quality value if present
+		if len(langParts) > 1 {
+			for _, param := range langParts[1:] {
+				param = strings.TrimSpace(param)
+				if strings.HasPrefix(param, "q=") {
+					if q, err := strconv.ParseFloat(param[2:], 64); err == nil {
+						quality = q
+					}
+				}
+			}
+		}
+
+		languages = append(languages, langQuality{lang: lang, quality: quality})
+	}
+
+	// Sort by quality (highest first)
+	sort.Slice(languages, func(i, j int) bool {
+		return languages[i].quality > languages[j].quality
+	})
+
+	// Return the first supported language
+	for _, langQ := range languages {
+		normalizedLang := normalizeLanguage(langQ.lang)
+		// Check if it's a supported language (not default fallback)
+		if normalizedLang == LanguageChinese || normalizedLang == LanguageEnglish {
+			if strings.HasPrefix(strings.ToLower(langQ.lang), string(normalizedLang)) {
+				return normalizedLang
+			}
+		}
+	}
+
+	// Default to English if no supported language found
+	return LanguageEnglish
 }

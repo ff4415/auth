@@ -14,8 +14,8 @@ func HandleResponseError_YuZhaGai(err error, w http.ResponseWriter, r *http.Requ
 	log := observability.GetLogEntry(r).Entry
 	errorID := utilities.GetRequestID(r.Context())
 
-	// Get user's language preference
-	userLang := i18n.GetLanguageFromRequest(r)
+	// Get user's language preference from context (set by middleware)
+	userLang := i18n.GetLanguageFromContextHTTP(r)
 
 	apiVersion, averr := DetermineClosestAPIVersion(r.Header.Get(APIVersionHeaderName))
 	if averr != nil {
