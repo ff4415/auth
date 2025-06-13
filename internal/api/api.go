@@ -13,6 +13,7 @@ import (
 	"github.com/supabase/auth/internal/hooks/hookshttp"
 	"github.com/supabase/auth/internal/hooks/hookspgfunc"
 	"github.com/supabase/auth/internal/hooks/v0hooks"
+	"github.com/supabase/auth/internal/i18n"
 	"github.com/supabase/auth/internal/mailer"
 	"github.com/supabase/auth/internal/models"
 	"github.com/supabase/auth/internal/observability"
@@ -123,6 +124,7 @@ func NewAPIWithVersion(globalConfig *conf.GlobalConfiguration, db *storage.Conne
 	r.UseBypass(logger)
 	r.UseBypass(xffmw.Handler)
 	r.UseBypass(recoverer)
+	r.UseBypass(i18n.LanguageMiddleware)
 
 	if globalConfig.API.MaxRequestDuration > 0 {
 		r.UseBypass(timeoutMiddleware(globalConfig.API.MaxRequestDuration))
