@@ -5,58 +5,6 @@ import (
 	"testing"
 )
 
-func TestConfigureDefaultsYuzha(t *testing.T) {
-	t.Run("Basic defaults when no data", func(t *testing.T) {
-		params := &SignupParams{}
-		params.ConfigureDefaultsYuzha()
-
-		if params.Data["user_language"] != "en" {
-			t.Errorf("Expected user_language 'en', got %v", params.Data["user_language"])
-		}
-		if params.Data["country"] != "US" {
-			t.Errorf("Expected country 'US', got %v", params.Data["country"])
-		}
-	})
-
-	t.Run("Preserve existing data", func(t *testing.T) {
-		params := &SignupParams{
-			Data: map[string]interface{}{
-				"user_language": "zh",
-				"country":       "CN",
-				"custom_field":  "value",
-			},
-		}
-		params.ConfigureDefaultsYuzha()
-
-		if params.Data["user_language"] != "zh" {
-			t.Errorf("Expected preserved user_language 'zh', got %v", params.Data["user_language"])
-		}
-		if params.Data["country"] != "CN" {
-			t.Errorf("Expected preserved country 'CN', got %v", params.Data["country"])
-		}
-		if params.Data["custom_field"] != "value" {
-			t.Errorf("Expected preserved custom_field 'value', got %v", params.Data["custom_field"])
-		}
-	})
-
-	t.Run("Fill missing defaults", func(t *testing.T) {
-		params := &SignupParams{
-			Data: map[string]interface{}{
-				"user_language": "zh",
-				// country is missing
-			},
-		}
-		params.ConfigureDefaultsYuzha()
-
-		if params.Data["user_language"] != "zh" {
-			t.Errorf("Expected preserved user_language 'zh', got %v", params.Data["user_language"])
-		}
-		if params.Data["country"] != "US" {
-			t.Errorf("Expected default country 'US', got %v", params.Data["country"])
-		}
-	})
-}
-
 func TestConfigureDefaultsYuzhaWithContext(t *testing.T) {
 	tests := []struct {
 		name             string

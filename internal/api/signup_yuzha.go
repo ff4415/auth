@@ -7,23 +7,6 @@ import (
 	"github.com/supabase/auth/internal/i18n"
 )
 
-func (p *SignupParams) ConfigureDefaultsYuzha() {
-	if p.Data == nil {
-		p.Data = make(map[string]interface{})
-		p.Data["user_language"] = "en"
-		p.Data["country"] = "US"
-	} else {
-		_, ok := p.Data["user_language"]
-		if !ok {
-			p.Data["user_language"] = "en"
-		}
-		_, ok = p.Data["country"]
-		if !ok {
-			p.Data["country"] = "US"
-		}
-	}
-}
-
 // ConfigureDefaultsYuzhaWithContext 根据请求上下文智能配置默认值
 func (p *SignupParams) ConfigureDefaultsYuzhaWithContext(r *http.Request) {
 	if p.Data == nil {

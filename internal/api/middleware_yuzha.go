@@ -14,13 +14,22 @@ import (
 	"github.com/supabase/auth/internal/utilities"
 )
 
-func (a *API) verifyYuZhaLabCode(w http.ResponseWriter, req *http.Request) (context.Context, error) {
+// verifyAndSetLanguage 检测并设置用户语言偏好到上下文
+// 适配 auth API 的中间件格式
+func (a *API) verifyAndSetLanguage(_ http.ResponseWriter, req *http.Request) (context.Context, error) {
 	ctx := req.Context()
 
-	// body := &security.YuZhaLabRequest{}
-	// if err := security.RetrieveYuZhaLabRequestParams(req, body); err != nil {
-	// 	return nil, err
-	// }
+	// 使用i18n包检测用户语言偏好
+	lang := i18n.GetLanguageFromRequest(req)
+
+	// 将语言偏好存储到上下文中
+	ctx = context.WithValue(ctx, i18n.UserLanguageKey, lang)
+
+	return ctx, nil
+}
+
+func (a *API) verifyYuZhaLabCode(w http.ResponseWriter, req *http.Request) (context.Context, error) {
+	ctx := req.Context()
 
 	body := &SignupParams{}
 	if err := retrieveRequestParams(req, body); err != nil {
@@ -112,44 +121,3 @@ func VerifyYuZhaLabRequest(requestBody *SignupParams) (security.VerificationResp
 
 	return verificationResponse, nil
 }
-
-// verifyAndSetLanguage 检测并设置用户语言偏好到上下文 (类似verifyYuZhaLabCode的中间件模式)
-func (a *API) verifyAndSetLanguage(w http.ResponseWriter, req *http.Request) (context.Context, error) {
-	ctx := req.Context()
-
-	// 使用i18n包检测用户语言偏好
-	lang := i18n.GetLanguageFromRequest(req)
-
-	// 将语言偏好存储到上下文中
-	ctx = context.WithValue(ctx, i18n.UserLanguageKey, lang)
-
-	return ctx, nil
-}
-
-/*
-使用示例:
-
-在路由中使用此中间件:
-```go
-// 在需要语言检测的路由中使用
-func (a *API) setupRoutes() {
-	// 使用verifyAndSetLanguage中间件
-	r.With(a.requireAdminCredentials, a.verifyAndSetLanguage).Post("/admin/users", a.adminCreateUser)
-
-	// 或者与其他中间件组合使用
-	r.With(a.verifyYuZhaLabCode, a.verifyAndSetLanguage).Post("/signup", a.signup)
-}
-
-// 在处理函数中获取语言
-func (a *API) someHandler(w http.ResponseWriter, r *http.Request) error {
-	// 从上下文获取用户语言偏好
-	lang := i18n.GetLanguageFromContext(r.Context())
-
-	// 使用语言进行本地化处理
-	message := i18n.GetMessage(lang, "success")
-
-	return sendJSON(w, http.StatusOK, map[string]interface{}{
-		"message": message,
-	})
-}
-*/

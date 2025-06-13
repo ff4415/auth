@@ -56,7 +56,7 @@ func recoverer(next http.Handler) http.Handler {
 					HTTPStatus: http.StatusInternalServerError,
 					Message:    http.StatusText(http.StatusInternalServerError),
 				}
-				HandleResponseError(se, w, r)
+				HandleResponseError_YuZhaGai(se, w, r)
 			}
 		}()
 		next.ServeHTTP(w, r)

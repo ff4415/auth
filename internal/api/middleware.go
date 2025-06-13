@@ -406,7 +406,7 @@ func timeoutMiddleware(timeout time.Duration) func(http.Handler) http.Handler {
 
 					httpError = httpError.WithInternalError(err)
 
-					HandleResponseError(httpError, w, r)
+					HandleResponseError_YuZhaGai(httpError, w, r)
 				} else {
 					// unrecognized context error, so we should wait for the server to finish
 					// and write out the response
