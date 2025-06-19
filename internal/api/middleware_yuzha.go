@@ -101,7 +101,7 @@ func VerifyYuZhaLabRequest(requestBody interface{}) (security.VerificationRespon
 
 		codeResponse = strings.TrimSpace(code)
 		email = strings.TrimSpace(body.Email)
-		// RecoverParams 不支持 phone
+		phone = strings.TrimSpace(body.Phone)
 
 	default:
 		return security.VerificationResponse{}, errors.New("unsupported request body type")

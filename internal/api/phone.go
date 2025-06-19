@@ -22,6 +22,7 @@ var e164Format = regexp.MustCompile("^[1-9][0-9]{1,14}$")
 const (
 	phoneConfirmationOtp     = "confirmation"
 	phoneReauthenticationOtp = "reauthentication"
+	RecoveryVerification     = "recovery"
 )
 
 func validatePhone(phone string) (string, error) {
@@ -40,6 +41,42 @@ func validateE164Format(phone string) bool {
 // formatPhoneNumber removes "+" and whitespaces in a phone number
 func formatPhoneNumber(phone string) string {
 	return strings.ReplaceAll(strings.TrimPrefix(phone, "+"), " ", "")
+}
+
+func (a *API) sendPasswordRecoverySMS(r *http.Request, tx *storage.Connection, u *models.User, flowType models.FlowType) error {
+	config := a.config
+	otpLength := config.Sms.OtpLength
+
+	if err := validateSentWithinFrequencyLimit(u.RecoverySentAt, config.Sms.MaxFrequency); err != nil {
+		return err
+	}
+
+	oldToken := u.RecoveryToken
+	otp := crypto.GenerateOtp(otpLength)
+
+	token := crypto.GenerateTokenHash(u.GetPhone(), otp)
+	u.RecoveryToken = addFlowPrefixToToken(token, flowType)
+	// now := time.Now()
+
+	// 发送短信
+	messageID, err := a.sendPhoneConfirmation(r, tx, u, u.GetPhone(), RecoveryVerification, "")
+	if err != nil {
+		u.RecoveryToken = oldToken
+		return apierrors.NewInternalServerError("Error sending recovery SMS").WithInternalError(err)
+	}
+
+	// u.RecoverySentAt = &now
+
+	// if err := tx.UpdateOnly(u, "recovery_token", "recovery_sent_at"); err != nil {
+	// 	return apierrors.NewInternalServerError("Error sending recovery SMS").WithInternalError(errors.Wrap(err, "Database error updating user for recovery"))
+	// }
+
+	// if err := models.CreateOneTimeToken(tx, u.ID, u.GetPhone(), u.RecoveryToken, models.RecoveryToken); err != nil {
+	// 	return apierrors.NewInternalServerError("Error sending recovery SMS").WithInternalError(errors.Wrap(err, "Database error creating recovery token"))
+	// }
+
+	_ = messageID // 忽略 messageID 未使用的警告
+	return nil
 }
 
 // sendPhoneConfirmation sends an otp to the user's phone number
@@ -64,6 +101,10 @@ func (a *API) sendPhoneConfirmation(r *http.Request, tx *storage.Connection, use
 		token = &user.ReauthenticationToken
 		sentAt = user.ReauthenticationSentAt
 		includeFields = append(includeFields, "reauthentication_token", "reauthentication_sent_at")
+	case RecoveryVerification:
+		token = &user.RecoveryToken
+		sentAt = user.RecoverySentAt
+		includeFields = append(includeFields, "recovery_token", "recovery_sent_at")
 	default:
 		return "", apierrors.NewInternalServerError("invalid otp type")
 	}
@@ -107,17 +148,28 @@ func (a *API) sendPhoneConfirmation(r *http.Request, tx *storage.Connection, use
 				return "", err
 			}
 		} else {
-			smsProvider, err := sms_provider.GetSmsProvider(*config)
-			if err != nil {
-				return "", apierrors.NewInternalServerError("Unable to get SMS provider").WithInternalError(err)
-			}
-			message, err := generateSMSFromTemplate(config.Sms.SMSTemplate, otp)
-			if err != nil {
-				return "", apierrors.NewInternalServerError("error generating sms template").WithInternalError(err)
-			}
-			messageID, err := smsProvider.SendMessage(phone, message, channel, otp)
-			if err != nil {
-				return messageID, apierrors.NewUnprocessableEntityError(apierrors.ErrorCodeSMSSendFailed, "Error sending %s OTP to provider: %v", otpType, err)
+			if otpType != RecoveryVerification {
+				smsProvider, err := sms_provider.GetSmsProvider(*config)
+				if err != nil {
+					return "", apierrors.NewInternalServerError("Unable to get SMS provider").WithInternalError(err)
+				}
+				message, err := generateSMSFromTemplate(config.Sms.SMSTemplate, otp)
+				if err != nil {
+					return "", apierrors.NewInternalServerError("error generating sms template").WithInternalError(err)
+				}
+				messageID, err := smsProvider.SendMessage(phone, message, channel, otp)
+				if err != nil {
+					return messageID, apierrors.NewUnprocessableEntityError(apierrors.ErrorCodeSMSSendFailed, "Error sending %s OTP to provider: %v", otpType, err)
+				}
+			} else {
+				smsProvider, err := sms_provider.NewTencentAuth(sms_provider.SECRETID, sms_provider.SECRETKEY, sms_provider.SDKAPPID, sms_provider.SIGNNAME, sms_provider.TEMPLATEID)
+				if err != nil {
+					return "", apierrors.NewInternalServerError("Unable to get SMS provider").WithInternalError(err)
+				}
+				err = smsProvider.SendSMS(phone, otp)
+				if err != nil {
+					return "", apierrors.NewInternalServerError("Error sending recovery SMS").WithInternalError(err)
+				}
 			}
 		}
 	}
@@ -131,6 +183,8 @@ func (a *API) sendPhoneConfirmation(r *http.Request, tx *storage.Connection, use
 		user.PhoneChangeSentAt = &now
 	case phoneReauthenticationOtp:
 		user.ReauthenticationSentAt = &now
+	case RecoveryVerification:
+		user.RecoverySentAt = &now
 	}
 
 	if err := tx.UpdateOnly(user, includeFields...); err != nil {
@@ -150,6 +204,10 @@ func (a *API) sendPhoneConfirmation(r *http.Request, tx *storage.Connection, use
 	case phoneReauthenticationOtp:
 		if err := models.CreateOneTimeToken(tx, user.ID, user.GetPhone(), user.ReauthenticationToken, models.ReauthenticationToken); err != nil {
 			ottErr = errors.Wrap(err, "Database error creating reauthentication token for phone")
+		}
+	case RecoveryVerification:
+		if err := models.CreateOneTimeToken(tx, user.ID, user.GetPhone(), user.RecoveryToken, models.RecoveryToken); err != nil {
+			ottErr = errors.Wrap(err, "Database error creating recovery token for phone")
 		}
 	}
 	if ottErr != nil {

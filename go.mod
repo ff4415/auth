@@ -100,6 +100,8 @@ require (
 	github.com/oapi-codegen/runtime v1.1.1
 	github.com/standard-webhooks/standard-webhooks/libraries v0.0.0-20240303152453-e0e82adf1721
 	github.com/supabase/hibp v0.0.0-20231124125943-d225752ae869
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/common v1.0.1190
+	github.com/tencentcloud/tencentcloud-sdk-go/tencentcloud/sms v1.0.1183
 	github.com/xeipuuv/gojsonschema v1.2.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.51.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.26.0
