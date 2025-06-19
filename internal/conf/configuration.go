@@ -480,6 +480,7 @@ type SmsProviderConfiguration struct {
 	TestOTPValidUntil Time               `json:"test_otp_valid_until" split_words:"true"`
 	SMSTemplate       *template.Template `json:"-"`
 
+	Tencent      TencentProviderConfiguration      `json:"tencent"`
 	Twilio       TwilioProviderConfiguration       `json:"twilio"`
 	TwilioVerify TwilioVerifyProviderConfiguration `json:"twilio_verify" split_words:"true"`
 	Messagebird  MessagebirdProviderConfiguration  `json:"messagebird"`
@@ -501,6 +502,14 @@ type TwilioProviderConfiguration struct {
 	AuthToken         string `json:"auth_token" split_words:"true"`
 	MessageServiceSid string `json:"message_service_sid" split_words:"true"`
 	ContentSid        string `json:"content_sid" split_words:"true"`
+}
+
+type TencentProviderConfiguration struct {
+	SecretId   string `json:"secret_id" split_words:"true"`
+	SecretKey  string `json:"secret_key" split_words:"true"`
+	SdkAppId   string `json:"sdk_app_id" split_words:"true"`
+	SignName   string `json:"sign_name" split_words:"true"`
+	TemplateId string `json:"template_id" split_words:"true"`
 }
 
 type TwilioVerifyProviderConfiguration struct {

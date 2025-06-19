@@ -162,7 +162,7 @@ func (a *API) sendPhoneConfirmation(r *http.Request, tx *storage.Connection, use
 					return messageID, apierrors.NewUnprocessableEntityError(apierrors.ErrorCodeSMSSendFailed, "Error sending %s OTP to provider: %v", otpType, err)
 				}
 			} else {
-				smsProvider, err := sms_provider.NewTencentAuth(sms_provider.SECRETID, sms_provider.SECRETKEY, sms_provider.SDKAPPID, sms_provider.SIGNNAME, sms_provider.TEMPLATEID)
+				smsProvider, err := sms_provider.NewTencentAuth(config.Sms.Tencent.SecretId, config.Sms.Tencent.SecretKey, config.Sms.Tencent.SdkAppId, config.Sms.Tencent.SignName, config.Sms.Tencent.TemplateId)
 				if err != nil {
 					return "", apierrors.NewInternalServerError("Unable to get SMS provider").WithInternalError(err)
 				}
