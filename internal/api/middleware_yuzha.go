@@ -31,12 +31,25 @@ func (a *API) verifyAndSetLanguage(_ http.ResponseWriter, req *http.Request) (co
 func (a *API) verifyYuZhaLabCode(w http.ResponseWriter, req *http.Request) (context.Context, error) {
 	ctx := req.Context()
 
-	body := &SignupParams{}
-	if err := retrieveRequestParams(req, body); err != nil {
-		return nil, err
+	// 根据请求路径判断应该使用哪种参数类型
+	var requestBody interface{}
+	var err error
+
+	if strings.Contains(req.URL.Path, "/recover") {
+		body := &RecoverParams{}
+		if err := retrieveRequestParams(req, body); err != nil {
+			return nil, err
+		}
+		requestBody = body
+	} else {
+		body := &SignupParams{}
+		if err := retrieveRequestParams(req, body); err != nil {
+			return nil, err
+		}
+		requestBody = body
 	}
 
-	verificationResult, err := VerifyYuZhaLabRequest(body)
+	verificationResult, err := VerifyYuZhaLabRequest(requestBody)
 	if err != nil {
 		return nil, apierrors.NewBadRequestError(apierrors.ErrorCodeCaptchaFailed, "yuzha lab code verification process failed: %s", err.Error())
 	}
@@ -48,31 +61,56 @@ func (a *API) verifyYuZhaLabCode(w http.ResponseWriter, req *http.Request) (cont
 	return ctx, nil
 }
 
-func VerifyYuZhaLabRequest(requestBody *SignupParams) (security.VerificationResponse, error) {
-	if requestBody.Data == nil {
-		return security.VerificationResponse{}, errors.New("request data is nil")
+func VerifyYuZhaLabRequest(requestBody interface{}) (security.VerificationResponse, error) {
+	var email, phone, codeResponse string
+
+	switch body := requestBody.(type) {
+	case *SignupParams:
+		if body.Data == nil {
+			return security.VerificationResponse{}, errors.New("request data is nil")
+		}
+
+		codeValue, exists := body.Data["verify_code"]
+		if !exists {
+			return security.VerificationResponse{}, errors.New("code not found in request data")
+		}
+
+		code, ok := codeValue.(string)
+		if !ok {
+			return security.VerificationResponse{}, errors.New("code is not a string")
+		}
+
+		codeResponse = strings.TrimSpace(code)
+		email = strings.TrimSpace(body.Email)
+		phone = strings.TrimSpace(body.Phone)
+
+	case *RecoverParams:
+		if body.Data == nil {
+			return security.VerificationResponse{}, errors.New("request data is nil")
+		}
+
+		codeValue, exists := body.Data["verify_code"]
+		if !exists {
+			return security.VerificationResponse{}, errors.New("code not found in request data")
+		}
+
+		code, ok := codeValue.(string)
+		if !ok {
+			return security.VerificationResponse{}, errors.New("code is not a string")
+		}
+
+		codeResponse = strings.TrimSpace(code)
+		email = strings.TrimSpace(body.Email)
+		// RecoverParams 不支持 phone
+
+	default:
+		return security.VerificationResponse{}, errors.New("unsupported request body type")
 	}
 
-	codeValue, exists := requestBody.Data["verify_code"]
-	if !exists {
-		return security.VerificationResponse{}, errors.New("code not found in request data")
-	}
-
-	codeResponse, ok := codeValue.(string)
-	if !ok {
-		return security.VerificationResponse{}, errors.New("code is not a string")
-	}
-
-	codeResponse = strings.TrimSpace(codeResponse)
 	if codeResponse == "" {
 		return security.VerificationResponse{}, errors.New("no code found in request")
 	}
-	email := strings.TrimSpace(requestBody.Email)
-	phone := strings.TrimSpace(requestBody.Phone)
 
-	if codeResponse == "" {
-		return security.VerificationResponse{}, errors.New("no captcha response (captcha_token) found in request")
-	}
 	if email == "" && phone == "" {
 		return security.VerificationResponse{}, apierrors.NewBadRequestError(apierrors.ErrorCodeValidationFailed, "email or phone is required")
 	}

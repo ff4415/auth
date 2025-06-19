@@ -10,9 +10,10 @@ import (
 
 // RecoverParams holds the parameters for a password recovery request
 type RecoverParams struct {
-	Email               string `json:"email"`
-	CodeChallenge       string `json:"code_challenge"`
-	CodeChallengeMethod string `json:"code_challenge_method"`
+	Email               string                 `json:"email"`
+	CodeChallenge       string                 `json:"code_challenge"`
+	CodeChallengeMethod string                 `json:"code_challenge_method"`
+	Data                map[string]interface{} `json:"data,omitempty"`
 }
 
 func (p *RecoverParams) Validate(a *API) error {
