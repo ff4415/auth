@@ -57,8 +57,8 @@ func (a *API) sendPasswordRecoverySMS(r *http.Request, tx *storage.Connection, u
 	token := crypto.GenerateTokenHash(u.GetPhone(), otp)
 	u.RecoveryToken = addFlowPrefixToToken(token, flowType)
 
-	now := time.Now()
-	u.RecoverySentAt = &now
+	// now := time.Now()
+	// u.RecoverySentAt = &now
 
 	// 发送短信
 	messageID, err := a.sendPhoneConfirmation(r, tx, u, u.GetPhone(), RecoveryVerification, "")
