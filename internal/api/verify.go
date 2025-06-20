@@ -644,7 +644,8 @@ func (a *API) verifyUserAndToken(conn *storage.Connection, params *VerifyParams,
 
 	var user *models.User
 	var err error
-	tokenHash := params.Token
+
+	tokenHash := crypto.GenerateTokenHash(params.Phone, params.Token)
 
 	switch params.Type {
 	case phoneChangeVerification:
