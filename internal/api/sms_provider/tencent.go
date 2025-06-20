@@ -72,7 +72,7 @@ func (t *TencentAuth) SendMessage(phone, message, channel, otp string) (string, 
 	// 发送短信
 	response, err := t.client.SendSms(request)
 	if err != nil {
-		return "", fmt.Errorf("failed to send sms: %v, phoneNumber: %s, code: %s, utc: %s", err, phoneNumber, code, time.Now().UTC().Format(time.RFC3339))
+		return "", fmt.Errorf("failed to send sms: %v, phoneNumber: %s, code: %s, utc: %s", err, phone, code, time.Now().UTC().Format(time.RFC3339))
 	}
 
 	// 检查发送状态
