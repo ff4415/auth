@@ -56,7 +56,9 @@ func (a *API) sendPasswordRecoverySMS(r *http.Request, tx *storage.Connection, u
 
 	token := crypto.GenerateTokenHash(u.GetPhone(), otp)
 	u.RecoveryToken = addFlowPrefixToToken(token, flowType)
-	// now := time.Now()
+
+	now := time.Now()
+	u.RecoverySentAt = &now
 
 	// 发送短信
 	messageID, err := a.sendPhoneConfirmation(r, tx, u, u.GetPhone(), RecoveryVerification, "")
@@ -64,8 +66,6 @@ func (a *API) sendPasswordRecoverySMS(r *http.Request, tx *storage.Connection, u
 		u.RecoveryToken = oldToken
 		return apierrors.NewInternalServerError("Error sending recovery SMS").WithInternalError(err)
 	}
-
-	// u.RecoverySentAt = &now
 
 	// if err := tx.UpdateOnly(u, "recovery_token", "recovery_sent_at"); err != nil {
 	// 	return apierrors.NewInternalServerError("Error sending recovery SMS").WithInternalError(errors.Wrap(err, "Database error updating user for recovery"))
@@ -166,9 +166,9 @@ func (a *API) sendPhoneConfirmation(r *http.Request, tx *storage.Connection, use
 				if err != nil {
 					return "", apierrors.NewInternalServerError("Unable to get SMS provider").WithInternalError(err)
 				}
-				err = smsProvider.SendSMS(phone, otp)
+				messageID, err = smsProvider.SendSMS(phone, otp)
 				if err != nil {
-					return "", apierrors.NewInternalServerError("Error sending recovery SMS").WithInternalError(err)
+					return messageID, apierrors.NewInternalServerError("Error sending recovery SMS").WithInternalError(err)
 				}
 			}
 		}

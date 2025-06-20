@@ -644,12 +644,12 @@ func (a *API) verifyUserAndToken(conn *storage.Connection, params *VerifyParams,
 
 	var user *models.User
 	var err error
-	tokenHash := params.TokenHash
+	tokenHash := params.Token
 
 	switch params.Type {
 	case phoneChangeVerification:
 		user, err = models.FindUserByPhoneChangeAndAudience(conn, params.Phone, aud)
-	case smsVerification:
+	case smsVerification, RecoveryVerification:
 		user, err = models.FindUserByPhoneAndAudience(conn, params.Phone, aud)
 	case mail.EmailChangeVerification:
 		// Since the email change could be trigger via the implicit or PKCE flow,

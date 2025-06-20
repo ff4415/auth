@@ -42,7 +42,7 @@ func NewTencentAuth(secretId, secretKey, sdkAppId, signName, templateId string) 
 	}, nil
 }
 
-func (t *TencentAuth) SendSMS(phoneNumber string, otp string) error {
+func (t *TencentAuth) SendSMS(phoneNumber string, otp string) (string, error) {
 	// 生成验证码
 	code := otp
 
@@ -72,12 +72,12 @@ func (t *TencentAuth) SendSMS(phoneNumber string, otp string) error {
 	// 发送短信
 	response, err := t.client.SendSms(request)
 	if err != nil {
-		return fmt.Errorf("failed to send sms: %v, phoneNumber: %s, code: %s, utc: %s", err, phoneNumber, code, time.Now().UTC().Format(time.RFC3339))
+		return "", fmt.Errorf("failed to send sms: %v, phoneNumber: %s, code: %s, utc: %s", err, phoneNumber, code, time.Now().UTC().Format(time.RFC3339))
 	}
 
 	// 检查发送状态
 	if response.Response == nil || len(response.Response.SendStatusSet) == 0 {
-		return fmt.Errorf("send sms failed: empty response")
+		return "", fmt.Errorf("send sms failed: empty response")
 	}
 
 	sendStatus := response.Response.SendStatusSet[0]
@@ -90,10 +90,14 @@ func (t *TencentAuth) SendSMS(phoneNumber string, otp string) error {
 		if sendStatus.Code != nil {
 			code = *sendStatus.Code
 		}
-		return fmt.Errorf("send sms failed, code: %s, message: %s", code, message)
+		return "", fmt.Errorf("send sms failed, code: %s, message: %s", code, message)
 	}
 
-	return nil
+	if response.Response.RequestId == nil {
+		return "", fmt.Errorf("send sms failed: empty request id")
+	}
+
+	return *response.Response.RequestId, nil
 }
 
 // SendSMSWithTemplate 发送带自定义模板参数的短信
