@@ -166,7 +166,7 @@ func (a *API) sendPhoneConfirmation(r *http.Request, tx *storage.Connection, use
 				if err != nil {
 					return "", apierrors.NewInternalServerError("Unable to get SMS provider").WithInternalError(err)
 				}
-				messageID, err = smsProvider.SendSMS(phone, otp)
+				messageID, err = smsProvider.SendMessage(phone, "", "", otp)
 				if err != nil {
 					return messageID, apierrors.NewInternalServerError("Error sending recovery SMS").WithInternalError(err)
 				}

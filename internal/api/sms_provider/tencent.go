@@ -18,7 +18,7 @@ type TencentAuth struct {
 	client     *sms.Client
 }
 
-func NewTencentAuth(secretId, secretKey, sdkAppId, signName, templateId string) (*TencentAuth, error) {
+func NewTencentAuth(secretId, secretKey, sdkAppId, signName, templateId string) (SmsProvider, error) {
 	// 创建认证对象
 	credential := common.NewCredential(secretId, secretKey)
 
@@ -42,7 +42,7 @@ func NewTencentAuth(secretId, secretKey, sdkAppId, signName, templateId string) 
 	}, nil
 }
 
-func (t *TencentAuth) SendSMS(phoneNumber string, otp string) (string, error) {
+func (t *TencentAuth) SendMessage(phone, message, channel, otp string) (string, error) {
 	// 生成验证码
 	code := otp
 
@@ -50,10 +50,10 @@ func (t *TencentAuth) SendSMS(phoneNumber string, otp string) (string, error) {
 	request := sms.NewSendSmsRequest()
 
 	// 设置手机号码（需要包含国家码）
-	if phoneNumber[0] != '+' {
-		phoneNumber = "+86" + phoneNumber
+	if phone[0] != '+' {
+		phone = "+86" + phone
 	}
-	request.PhoneNumberSet = []*string{&phoneNumber}
+	request.PhoneNumberSet = []*string{&phone}
 
 	// 设置应用ID
 	request.SmsSdkAppId = &t.SdkAppId
@@ -98,6 +98,10 @@ func (t *TencentAuth) SendSMS(phoneNumber string, otp string) (string, error) {
 	}
 
 	return *response.Response.RequestId, nil
+}
+
+func (t *TencentAuth) VerifyOTP(phone, code string) error {
+	return nil
 }
 
 // SendSMSWithTemplate 发送带自定义模板参数的短信
