@@ -695,7 +695,7 @@ func (a *API) verifyUserAndToken(conn *storage.Connection, params *VerifyParams,
 		}
 	case mail.SignupVerification, mail.InviteVerification:
 		isValid = isOtpValid(tokenHash, user.ConfirmationToken, user.ConfirmationSentAt, config.Mailer.OtpExp)
-	case mail.RecoveryVerification, mail.MagicLinkVerification:
+	case mail.RecoveryVerification, mail.MagicLinkVerification, RecoveryVerification:
 		isValid = isOtpValid(tokenHash, user.RecoveryToken, user.RecoverySentAt, config.Mailer.OtpExp)
 	case mail.EmailChangeVerification:
 		isValid = isOtpValid(tokenHash, user.EmailChangeTokenCurrent, user.EmailChangeSentAt, config.Mailer.OtpExp) ||
