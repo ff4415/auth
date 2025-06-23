@@ -645,7 +645,14 @@ func (a *API) verifyUserAndToken(conn *storage.Connection, params *VerifyParams,
 	var user *models.User
 	var err error
 
-	tokenHash := crypto.GenerateTokenHash(params.Phone, params.Token)
+	var tokenHash string
+	if params.Phone != "" {
+		tokenHash = crypto.GenerateTokenHash(params.Phone, params.Token)
+	} else if params.Email != "" {
+		tokenHash = crypto.GenerateTokenHash(params.Email, params.Token)
+	} else {
+		return nil, apierrors.NewBadRequestError(apierrors.ErrorCodeValidationFailed, "Invalid email verification type")
+	}
 
 	switch params.Type {
 	case phoneChangeVerification:
