@@ -22,7 +22,7 @@ var e164Format = regexp.MustCompile("^[1-9][0-9]{1,14}$")
 const (
 	phoneConfirmationOtp     = "confirmation"
 	phoneReauthenticationOtp = "reauthentication"
-	RecoveryVerification     = "recovery"
+	RecoveryVerification     = "phone_recovery"
 )
 
 func validatePhone(phone string) (string, error) {
