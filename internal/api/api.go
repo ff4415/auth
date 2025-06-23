@@ -187,7 +187,7 @@ func NewAPIWithVersion(globalConfig *conf.GlobalConfiguration, db *storage.Conne
 			})
 		})
 		r.With(api.limitHandler(api.limiterOpts.Recover)).
-			With(api.verifyCaptcha).With(api.verifyYuZhaLabCode).With(api.requireEmailProvider).Post("/recover", api.Recover)
+			With(api.verifyCaptcha).With(api.requireEmailProvider).Post("/recover", api.Recover)
 
 		r.With(api.limitHandler(api.limiterOpts.Resend)).
 			With(api.verifyCaptcha).Post("/resend", api.Resend)
