@@ -250,7 +250,7 @@ func (a *API) verifyPost(w http.ResponseWriter, r *http.Request, params *VerifyP
 		switch params.Type {
 		case mail.SignupVerification, mail.InviteVerification:
 			user, terr = a.signupVerify(r, ctx, tx, user)
-		case mail.RecoveryVerification, mail.MagicLinkVerification:
+		case mail.RecoveryVerification, mail.MagicLinkVerification, RecoveryVerification:
 			user, terr = a.recoverVerify(r, tx, user)
 		case mail.EmailChangeVerification:
 			user, terr = a.emailChangeVerify(r, tx, params, user)
