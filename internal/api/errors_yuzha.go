@@ -71,7 +71,7 @@ func HandleResponseError_YuZhaGai(err error, w http.ResponseWriter, r *http.Requ
 		case e.HTTPStatus == http.StatusTooManyRequests:
 			log.WithError(e.Cause()).Warn(e.Error())
 		default:
-			log.WithError(e.Cause()).Info(e.Error())
+			// log.WithError(e.Cause()).Info(e.Error())
 		}
 
 		if e.ErrorCode != "" {

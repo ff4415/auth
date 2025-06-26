@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
+	"github.com/gobuffalo/pop/v6"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -37,10 +38,11 @@ func serve(ctx context.Context) {
 		logrus.WithError(err).Error("unable to load config from watch dir")
 	}
 
-	config, err := conf.LoadGlobalFromEnv()
-	if err != nil {
-		logrus.WithError(err).Fatal("unable to load config")
-	}
+	// 使用 loadGlobalConfig 以启用 observability 配置（包括 SQL 日志）
+	config := loadGlobalConfig(ctx)
+
+	// 添加与 migrate_cmd.go 相同的数据库日志配置
+	setupDatabaseLogging(config)
 
 	db, err := storage.Dial(config)
 	if err != nil {
@@ -125,5 +127,27 @@ func serve(ctx context.Context) {
 	}
 	if err := httpSrv.Serve(listener); err != nil {
 		log.WithError(err).Fatal("http server serve failed")
+	}
+}
+
+// 添加这个函数（从 migrate_cmd.go 复制过来的逻辑）
+func setupDatabaseLogging(config *conf.GlobalConfiguration) {
+	log := logrus.StandardLogger()
+
+	// 确保 pop.Debug 根据日志级别正确设置
+	if config.Logging.Level != "" {
+		level, err := logrus.ParseLevel(config.Logging.Level)
+		if err != nil {
+			log.Warnf("Failed to parse log level: %+v", err)
+			return
+		}
+
+		if level == logrus.DebugLevel {
+			// 关键：设置 pop.Debug = true
+			pop.Debug = true
+			log.Info("Database debug logging enabled (pop.Debug = true)")
+		}
+
+		// 注意：不要在 serve 模式下设置 noopLogger，因为我们想要看到 SQL 日志
 	}
 }
